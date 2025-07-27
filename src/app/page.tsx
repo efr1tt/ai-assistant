@@ -75,19 +75,21 @@ export default function Home() {
 
   if (messages.length === 0) {
     return (
-      <div className="relative flex flex-col items-center justify-center min-h-screen px-4 py-20 font-sans bg-background text-foreground">
+      <div className="flex flex-col min-h-screen items-center w-full font-sans bg-background text-foreground">
         <header className="absolute left-4 top-4 text-lg font-medium">
           <Image src="/favicon.ico" alt="logo" width={24} height={24} className="inline-block mr-2" />
           AI Psych
         </header>
-        <main className="flex flex-col items-center gap-4 text-center w-full max-w-3xl animate-fade-in">
+        <main className="flex flex-col items-center justify-center flex-1 text-center px-4 w-full max-w-3xl animate-fade-in pb-28">
           <h1 className="text-3xl sm:text-4xl font-semibold">
             {greetText}
             {input === '' && !focused && <span className="typewriter-cursor">|</span>}
           </h1>
           <p className="text-gray-400 text-base sm:text-lg">Онлайн психологическая поддержка с ИИ</p>
-          <div className="mt-12 w-full">{InputField}</div>
         </main>
+        <div className="w-full fixed bottom-0 left-0 right-0 bg-background border-t border-[#565869] px-4 pb-4 flex justify-center">
+          {InputField}
+        </div>
       </div>
     )
   }
@@ -110,7 +112,7 @@ export default function Home() {
         </AnimatePresence>
         <div ref={endRef} />
       </div>
-      <div className="w-full px-4 pb-4 fixed bottom-0 left-0 right-0 bg-background border-t border-[#565869]">
+      <div className="w-full fixed bottom-0 left-0 right-0 bg-background border-t border-[#565869] px-4 pb-4 flex justify-center">
         {InputField}
       </div>
     </div>
