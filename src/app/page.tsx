@@ -68,7 +68,7 @@ export default function Home() {
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder="Спросите что-нибудь..."
-        className="w-full p-4 rounded border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors"
+        className="w-full p-4 rounded-lg border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors"
       />
     </div>
   )
@@ -80,16 +80,14 @@ export default function Home() {
           <Image src="/favicon.ico" alt="logo" width={24} height={24} className="inline-block mr-2" />
           AI Psych
         </header>
-        <main className="flex flex-col items-center justify-center flex-1 text-center px-4 w-full max-w-3xl animate-fade-in pb-28">
+        <main className="flex flex-col items-center justify-center flex-1 text-center px-4 w-full max-w-3xl animate-fade-in gap-6">
           <h1 className="text-3xl sm:text-4xl font-semibold">
             {greetText}
             {input === '' && !focused && <span className="typewriter-cursor">|</span>}
           </h1>
           <p className="text-gray-400 text-base sm:text-lg">Онлайн психологическая поддержка с ИИ</p>
-        </main>
-        <div className="w-full fixed bottom-0 left-0 right-0 bg-background border-t border-[#565869] px-4 pb-4 flex justify-center">
           {InputField}
-        </div>
+        </main>
       </div>
     )
   }
@@ -112,7 +110,7 @@ export default function Home() {
         </AnimatePresence>
         <div ref={endRef} />
       </div>
-      <div className="w-full fixed bottom-0 left-0 right-0 bg-background border-t border-[#565869] px-4 pb-4 flex justify-center">
+      <div className="w-full fixed bottom-0 left-0 right-0 bg-background px-4 pb-4 flex justify-center">
         {InputField}
       </div>
     </div>
