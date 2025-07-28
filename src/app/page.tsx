@@ -56,7 +56,7 @@ export default function Home() {
   }
 
   const InputField = (
-    <div className="w-full max-w-3xl relative">
+    <div className="w-full max-w-3xl relative flex items-center">
       {focused && input === '' && (
         <span className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none animate-blink">|</span>
       )}
@@ -68,8 +68,20 @@ export default function Home() {
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder="Спросите что-нибудь..."
-        className="w-full p-4 rounded-lg border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors"
+        className="w-full p-4 rounded-lg border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors pr-12"
       />
+      <button
+        onClick={sendMessage}
+        disabled={input.trim() === ''}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 disabled:text-gray-500 disabled:cursor-not-allowed hover:text-white ${
+          input.trim() !== '' ? 'text-white' : 'text-gray-400'
+        }`}
+        aria-label="Отправить"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+          <path d="M2.94 2.94a.75.75 0 011.06 0l14 14a.75.75 0 01-1.06 1.06L11 12.12l-2.97 5.88a.75.75 0 01-1.39-.28L5.67 10.5 1.06 8.03a.75.75 0 01.28-1.39l17-4.25a.75.75 0 01.9.9l-4.25 17a.75.75 0 01-1.39.28L9.5 14.33 2.94 2.94z" />
+        </svg>
+      </button>
     </div>
   )
 
