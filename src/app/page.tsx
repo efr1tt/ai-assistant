@@ -73,7 +73,9 @@ export default function Home() {
       <button
         onClick={sendMessage}
         disabled={input.trim() === ''}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed hover:text-white"
+        className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 disabled:text-gray-500 disabled:cursor-not-allowed hover:text-white ${
+          input.trim() !== '' ? 'text-white' : 'text-gray-400'
+        }`}
         aria-label="Отправить"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
