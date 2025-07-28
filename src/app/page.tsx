@@ -17,6 +17,7 @@ export default function Home() {
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const endRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let i = 0
@@ -30,6 +31,10 @@ export default function Home() {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  useEffect(() => {
+    inputRef.current?.focus()
   }, [messages])
 
   const sendMessage = () => {
@@ -65,6 +70,7 @@ export default function Home() {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
+        ref={inputRef}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder="Спросите что-нибудь..."
