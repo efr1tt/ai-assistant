@@ -37,20 +37,41 @@ export default function Home() {
     inputRef.current?.focus()
   }, [messages])
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = input.trim()
     if (!text) return
     const msg: Message = { id: Date.now(), sender: 'user', text }
     setMessages((m) => [...m, msg])
     setInput('')
-    setTimeout(() => {
+
+    const history = [...messages, msg].map((m) => ({
+      role: m.sender === 'user' ? 'user' : 'assistant',
+      text: m.text,
+    }))
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      })
+
+      if (!res.ok) throw new Error('Request failed')
+      const data = await res.json()
       const reply: Message = {
         id: Date.now() + 1,
         sender: 'bot',
-        text: 'Хорошо, я вас понял.',
+        text: data.text || 'Извините, не удалось получить ответ',
       }
       setMessages((m) => [...m, reply])
-    }, 1000)
+    } catch (err) {
+      const reply: Message = {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: 'Извините, не удалось получить ответ',
+      }
+      setMessages((m) => [...m, reply])
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
