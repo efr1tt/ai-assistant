@@ -17,7 +17,9 @@ export default function Home() {
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const endRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const messagesRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [inputHeight, setInputHeight] = useState(0)
 
   useEffect(() => {
     let i = 0
@@ -30,11 +32,20 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesRef.current) {
+      messagesRef.current.scrollTo({
+        top: messagesRef.current.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
   }, [messages])
 
   useEffect(() => {
-    inputRef.current?.focus()
+    adjustHeight()
+  }, [])
+
+  useEffect(() => {
+    textareaRef.current?.focus()
   }, [messages])
 
   const sendMessage = async () => {
@@ -43,6 +54,7 @@ export default function Home() {
     const msg: Message = { id: Date.now(), sender: 'user', text }
     setMessages((m) => [...m, msg])
     setInput('')
+    requestAnimationFrame(adjustHeight)
 
     const history = [...messages, msg].map((m) => ({
       role: m.sender === 'user' ? 'user' : 'assistant',
@@ -74,33 +86,46 @@ export default function Home() {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  const adjustHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+      setInputHeight(textareaRef.current.offsetHeight)
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value)
+    adjustHeight()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage()
     }
   }
 
   const InputField = (
-    <div className="w-full max-w-3xl relative flex items-center">
+    <div className="w-full max-w-3xl relative flex items-end">
       {focused && input === '' && (
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none animate-blink">|</span>
+        <span className="absolute left-4 top-3 pointer-events-none animate-blink">|</span>
       )}
-      <input
-        type="text"
+      <textarea
+        ref={textareaRef}
+        rows={1}
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        ref={inputRef}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder="Спросите что-нибудь..."
-        className="w-full p-4 rounded-lg border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors pr-12"
+        className="w-full resize-none overflow-hidden min-h-[3rem] p-4 rounded-lg border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors pr-12"
       />
       <button
         onClick={sendMessage}
         disabled={input.trim() === ''}
-        className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 disabled:text-gray-500 disabled:cursor-not-allowed hover:text-white ${
+        className={`absolute right-2 bottom-2 p-2 disabled:text-gray-500 disabled:cursor-not-allowed hover:text-white ${
           input.trim() !== '' ? 'text-white' : 'text-gray-400'
         }`}
         aria-label="Отправить"
@@ -137,7 +162,11 @@ export default function Home() {
         <Image src="/favicon.ico" alt="logo" width={24} height={24} className="inline-block mr-2" />
         AI Psych
       </header>
-      <div className="flex-1 overflow-y-auto w-full max-w-3xl px-4 pt-24 pb-4 space-y-4">
+      <div
+        ref={messagesRef}
+        className="flex-1 overflow-y-auto w-full max-w-3xl px-4 pt-24 space-y-4"
+        style={{ paddingBottom: inputHeight + 16 }}
+      >
         <AnimatePresence initial={false}>
           {messages.map((m) => (
             <motion.div key={m.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
