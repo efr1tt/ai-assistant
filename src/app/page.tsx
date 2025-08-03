@@ -207,8 +207,8 @@ export default function Home() {
           AI Psych-Help
         </header>
         <div
-          className="flex flex-col flex-1 items-center justify-center text-center px-4 w-full max-w-3xl mx-auto animate-fade-in gap-6"
-          style={{ paddingBottom: inputHeight + bottomOffset }}
+          className="flex flex-col items-center justify-center text-center px-4 w-full max-w-3xl mx-auto animate-fade-in gap-6 overflow-y-auto"
+          style={{ height: `calc(100dvh - ${inputHeight + bottomOffset}px)` }}
         >
           <h1 className="text-3xl sm:text-4xl font-semibold">
             {greetText}
@@ -222,7 +222,7 @@ export default function Home() {
         </div>
         <div
           ref={inputWrapperRef}
-          className="fixed left-0 right-0 bg-background px-2 sm:px-4 pb-2 sm:pb-4"
+          className="fixed bottom-0 left-0 right-0 bg-background px-2 sm:px-4 pb-2 sm:pb-4"
           style={{ bottom: bottomOffset }}
         >
           <div className="w-full max-w-3xl mx-auto">{InputField}</div>
@@ -245,8 +245,8 @@ export default function Home() {
       </header>
       <div
         ref={listRef}
-        className="flex-1 overflow-y-auto px-2 sm:px-4 pt-20 sm:pt-24 space-y-4 w-full max-w-3xl mx-auto"
-        style={{ paddingBottom: inputHeight + bottomOffset }}
+        className="overflow-y-auto px-2 sm:px-4 pt-20 sm:pt-24 space-y-4 w-full max-w-3xl mx-auto"
+        style={{ height: `calc(100dvh - ${inputHeight + bottomOffset}px)` }}
       >
         <AnimatePresence initial={false}>
           {messages.map((m) => (
@@ -277,7 +277,7 @@ export default function Home() {
       </div>
       <div
         ref={inputWrapperRef}
-        className="fixed left-0 right-0 bg-background px-2 sm:px-4 pb-2 sm:pb-4"
+        className="fixed bottom-0 left-0 right-0 bg-background px-2 sm:px-4 pb-2 sm:pb-4"
         style={{ bottom: bottomOffset }}
       >
         <div className="w-full max-w-3xl mx-auto">{InputField}</div>
