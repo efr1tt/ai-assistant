@@ -16,8 +16,11 @@ export default function Home() {
   const [focused, setFocused] = useState(false)
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState<Message[]>([])
-  const endRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const inputWrapperRef = useRef<HTMLDivElement>(null)
+  const [inputHeight, setInputHeight] = useState(0)
+  const [bottomOffset, setBottomOffset] = useState(0)
 
   useEffect(() => {
     let i = 0
@@ -30,8 +33,36 @@ export default function Home() {
   }, [])
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    endRef.current?.scrollIntoView({ behavior, block: "end" })
+    const el = listRef.current
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior })
+    }
   }
+
+  const updateInputHeight = () => {
+    if (inputWrapperRef.current) {
+      setInputHeight(inputWrapperRef.current.offsetHeight)
+    }
+  }
+
+  useEffect(() => {
+    updateInputHeight()
+    const handleWindowResize = () => updateInputHeight()
+    window.addEventListener("resize", handleWindowResize)
+    return () => window.removeEventListener("resize", handleWindowResize)
+  }, [])
+
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return
+    const handleResize = () => {
+      setBottomOffset(window.innerHeight - viewport.height - viewport.offsetTop)
+      scrollToBottom("auto")
+    }
+    handleResize()
+    viewport.addEventListener("resize", handleResize)
+    return () => viewport.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     scrollToBottom()
@@ -46,20 +77,20 @@ export default function Home() {
   }, [focused])
 
   useEffect(() => {
-    const viewport = window.visualViewport
-    if (!viewport) return
-    const handleResize = () => scrollToBottom("auto")
-    viewport.addEventListener("resize", handleResize)
-    return () => viewport.removeEventListener("resize", handleResize)
-  }, [])
-
-  useEffect(() => {
     adjustHeight()
   }, [])
 
   useEffect(() => {
     textareaRef.current?.focus()
   }, [messages])
+
+  useEffect(() => {
+    updateInputHeight()
+  }, [messages])
+
+  useEffect(() => {
+    scrollToBottom("auto")
+  }, [inputHeight])
 
   const sendMessage = async () => {
     const text = input.trim()
@@ -104,6 +135,7 @@ export default function Home() {
       textareaRef.current.style.height = "auto"
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
+    updateInputHeight()
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -163,7 +195,7 @@ export default function Home() {
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col h-dvh items-center w-full font-sans bg-background text-foreground">
+      <div className="flex flex-col h-dvh w-full font-sans bg-background text-foreground">
         <header className="absolute left-4 top-4 text-lg font-medium">
           <Image
             src="/favicon.ico"
@@ -174,7 +206,10 @@ export default function Home() {
           />
           AI Psych-Help
         </header>
-        <div className="flex flex-col flex-1 items-center justify-center text-center px-4 w-full max-w-3xl animate-fade-in gap-6">
+        <div
+          className="flex flex-col flex-1 items-center justify-center text-center px-4 w-full max-w-3xl mx-auto animate-fade-in gap-6"
+          style={{ paddingBottom: inputHeight + bottomOffset }}
+        >
           <h1 className="text-3xl sm:text-4xl font-semibold">
             {greetText}
             {input === "" && !focused && (
@@ -185,15 +220,19 @@ export default function Home() {
             Онлайн психологическая поддержка с ИИ
           </p>
         </div>
-        <div className="w-full bg-background px-2 sm:px-4 pb-2 sm:pb-4 flex justify-center">
-          {InputField}
+        <div
+          ref={inputWrapperRef}
+          className="fixed left-0 right-0 bg-background px-2 sm:px-4 pb-2 sm:pb-4"
+          style={{ bottom: bottomOffset }}
+        >
+          <div className="w-full max-w-3xl mx-auto">{InputField}</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-dvh items-center w-full font-sans bg-background text-foreground">
+    <div className="flex flex-col h-dvh w-full font-sans bg-background text-foreground">
       <header className="absolute left-4 top-4 text-lg font-medium">
         <Image
           src="/favicon.ico"
@@ -204,39 +243,44 @@ export default function Home() {
         />
         AI Psych
       </header>
-      <div className="flex flex-col flex-1 w-full max-w-3xl px-2 sm:px-4 pt-20 sm:pt-24">
-        <div className="flex-1 overflow-y-auto space-y-4">
-          <AnimatePresence initial={false}>
-            {messages.map((m) => (
-              <motion.div
-                key={m.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto px-2 sm:px-4 pt-20 sm:pt-24 space-y-4 w-full max-w-3xl mx-auto"
+        style={{ paddingBottom: inputHeight + bottomOffset }}
+      >
+        <AnimatePresence initial={false}>
+          {messages.map((m) => (
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <div
+                className={`flex ${
+                  m.sender === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
-                  className={`flex ${
-                    m.sender === "user" ? "justify-end" : "justify-start"
+                  className={`max-w-[70%] px-4 py-3 rounded-md text-sm leading-relaxed whitespace-pre-wrap ${
+                    m.sender === "user"
+                      ? "bg-[#343541] text-gray-100"
+                      : "bg-[#444654] text-gray-100"
                   }`}
                 >
-                  <div
-                    className={`max-w-[70%] px-4 py-3 rounded-md text-sm leading-relaxed whitespace-pre-wrap ${
-                      m.sender === "user"
-                        ? "bg-[#343541] text-gray-100"
-                        : "bg-[#444654] text-gray-100"
-                    }`}
-                  >
-                    {m.text}
-                  </div>
+                  {m.text}
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          <div ref={endRef} />
-        </div>
-        <div className="bg-background pb-2 sm:pb-4">
-          {InputField}
-        </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+      <div
+        ref={inputWrapperRef}
+        className="fixed left-0 right-0 bg-background px-2 sm:px-4 pb-2 sm:pb-4"
+        style={{ bottom: bottomOffset }}
+      >
+        <div className="w-full max-w-3xl mx-auto">{InputField}</div>
       </div>
     </div>
   )
