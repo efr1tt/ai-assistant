@@ -29,8 +29,8 @@ export default function Home() {
     return () => clearInterval(id)
   }, [])
 
-  const scrollToBottom = () => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" })
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    endRef.current?.scrollIntoView({ behavior, block: "end" })
   }
 
   useEffect(() => {
@@ -40,6 +40,18 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (focused) scrollToBottom("auto")
+  }, [focused])
+
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return
+    const handleResize = () => scrollToBottom("auto")
+    viewport.addEventListener("resize", handleResize)
+    return () => viewport.removeEventListener("resize", handleResize)
+  }, [])
 
   useEffect(() => {
     adjustHeight()
@@ -106,6 +118,11 @@ export default function Home() {
     }
   }
 
+  const handleFocus = () => {
+    setFocused(true)
+    setTimeout(() => scrollToBottom("auto"), 300)
+  }
+
   const InputField = (
     <div className="w-full max-w-3xl relative flex items-end">
       {focused && input === "" && (
@@ -119,7 +136,7 @@ export default function Home() {
         value={input}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
+        onFocus={handleFocus}
         onBlur={() => setFocused(false)}
         placeholder="Спросите что-нибудь..."
         className="w-full resize-none overflow-hidden min-h-[3rem] p-4 rounded-lg border border-[#565869] bg-[#40414f] placeholder-gray-400 text-white focus:outline-none hover:border-gray-400 transition-colors pr-12"
